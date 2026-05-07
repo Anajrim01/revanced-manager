@@ -18,7 +18,9 @@ import app.revanced.manager.domain.sources.PatchBundleSource
 import app.revanced.manager.domain.sources.Source.State
 import app.revanced.manager.domain.manager.PreferencesManager
 import app.revanced.manager.domain.repository.PatchBundleRepository
+import app.revanced.manager.domain.sources.Extensions.asRemoteOrNull
 import app.revanced.manager.domain.sources.Extensions.version
+import app.revanced.manager.patcher.patch.Option
 import app.revanced.manager.patcher.patch.PatchBundleInfo
 import app.revanced.manager.patcher.patch.PatchBundleInfo.Extensions.toPatchSelection
 import app.revanced.manager.patcher.patch.PatchInfo
@@ -235,6 +237,12 @@ class PatchesSelectorViewModel(input: SelectedApplicationInfo.PatchesSelector.Vi
         patchOptions[bundle] = patchOptions[bundle]?.remove(patch.name) ?: return
     }
 
+    fun resetOption(bundle: Int, patch: PatchInfo, option: Option<*>) {
+        val bundlesToPatches = patchOptions[bundle] ?: return
+        val patchesToOpts = bundlesToPatches[patch.name] ?: return
+        patchOptions[bundle] = bundlesToPatches.put(patch.name, patchesToOpts.remove(option.name))
+    }
+
     fun dismissDialogs() {
         activeDialog = null
     }
@@ -375,6 +383,7 @@ private fun PatchSelection.toPersistentPatchSelection(): PersistentPatchSelectio
 private fun PatchBundleInfo.Global.asReadonlyScoped() = PatchBundleInfo.Scoped(
     name = name,
     version = version,
+    releasedAt = releasedAt,
     uid = uid,
     patches = patches,
     compatible = patches,
@@ -385,6 +394,7 @@ private fun PatchBundleInfo.Global.asReadonlyScoped() = PatchBundleInfo.Scoped(
 private fun PatchBundleSource.emptyScopedBundleInfo() = PatchBundleInfo.Scoped(
     name = name,
     version = version,
+    releasedAt = (this.asRemoteOrNull)?.releasedAt,
     uid = uid,
     patches = emptyList(),
     compatible = emptyList(),

@@ -1,9 +1,10 @@
 package app.revanced.manager.ui.screen
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -26,12 +27,15 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.collectAsLazyPagingItems
 import app.revanced.manager.R
 import app.revanced.manager.ui.component.AppTopBar
 import app.revanced.manager.ui.component.BottomContentBar
@@ -48,6 +52,18 @@ fun UpdateScreen(
     vm: UpdateViewModel = koinViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior(rememberTopAppBarState())
+    val changelogs = vm.changelogs.collectAsLazyPagingItems()
+
+    BackHandler(
+        enabled = vm.state == State.DOWNLOADING || vm.state == State.CAN_INSTALL
+    ) {
+        if (vm.backPressedOnce) {
+            vm.cancelUpdate()
+            onBackClick()
+        } else {
+            vm.onBackPressed()
+        }
+    }
 
     val buttonConfig = when (vm.state) {
         State.CAN_DOWNLOAD -> Triple(
@@ -108,13 +124,21 @@ fun UpdateScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { paddingValues ->
         Column(
-            modifier = Modifier.padding(paddingValues).fillMaxSize(),
+            modifier = Modifier.padding(paddingValues),
         ) {
-            if (vm.state == State.DOWNLOADING)
-                LinearWavyProgressIndicator(
-                    progress = { vm.downloadProgress },
-                    modifier = Modifier.fillMaxWidth(),
+            if (vm.state == State.DOWNLOADING) {
+                val updaterProgress by animateFloatAsState(
+                    targetValue = vm.downloadProgress,
+                    animationSpec = tween(),
+                    label = "updaterProgress"
                 )
+
+                LinearWavyProgressIndicator(
+                    progress = { updaterProgress },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                )
+            }
 
             AnimatedVisibility(visible = vm.showInternetCheckDialog) {
                 MeteredDownloadConfirmationDialog(
@@ -124,8 +148,7 @@ fun UpdateScreen(
             }
 
             ChangelogList(
-                state = vm.changelogsState,
-                onLoadMore = vm::loadNextPage,
+                changelogs = changelogs
             )
         }
     }

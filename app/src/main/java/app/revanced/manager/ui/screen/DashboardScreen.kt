@@ -1,14 +1,17 @@
 package app.revanced.manager.ui.screen
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
-import androidx.activity.compose.BackHandler
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -24,11 +27,13 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Update
@@ -36,11 +41,11 @@ import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material.icons.outlined.Source
 import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -70,10 +75,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.material.icons.outlined.Refresh
-import androidx.compose.material3.LocalContentColor
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.revanced.manager.R
 import app.revanced.manager.network.dto.ReVancedAnnouncement
@@ -85,9 +86,9 @@ import app.revanced.manager.ui.component.NotificationCardType
 import app.revanced.manager.ui.component.PillTab
 import app.revanced.manager.ui.component.PillTabBar
 import app.revanced.manager.ui.component.TooltipIconButton
+import app.revanced.manager.ui.component.haptics.HapticExtendedFloatingActionButton
 import app.revanced.manager.ui.component.sources.ImportSourceDialog
 import app.revanced.manager.ui.component.sources.ImportSourceDialogStrings
-import app.revanced.manager.ui.component.haptics.HapticExtendedFloatingActionButton
 import app.revanced.manager.ui.model.SelectedApp
 import app.revanced.manager.ui.model.navigation.SelectedApplicationInfo
 import app.revanced.manager.ui.viewmodel.DashboardViewModel
@@ -97,7 +98,6 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import kotlin.collections.emptyList
 
 enum class DashboardPage(
     val titleResId: Int,
@@ -112,7 +112,6 @@ enum class DashboardPage(
 @Composable
 fun DashboardScreen(
     vm: DashboardViewModel = koinViewModel(),
-    onAppSelectorClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onUpdateClick: () -> Unit,
     onAnnouncementsClick: () -> Unit,
@@ -122,7 +121,6 @@ fun DashboardScreen(
     onStorageSelect: (SelectedApp.Local) -> Unit,
     onBundleClick: (Int) -> Unit
 ) {
-    val availablePatches by vm.availablePatches.collectAsStateWithLifecycle(0)
     val bundleDownloadError by vm.bundleDownloadError.collectAsStateWithLifecycle(null)
     val sourcesNotDownloaded by vm.sourcesNotDownloaded.collectAsStateWithLifecycle(false)
     val sourceUpdatesAvailable by vm.sourceUpdatesAvailable.collectAsStateWithLifecycle(false)
@@ -145,7 +143,8 @@ fun DashboardScreen(
                     !suggestedVersionSafeguard
         }
     }
-    val availableUpdate by vm.availableManagerUpdate.collectAsStateWithLifecycle()
+    val hasUpdate by vm.hasUpdate.collectAsStateWithLifecycle()
+    val updateVersion by vm.updateVersion.collectAsStateWithLifecycle()
     val androidContext = LocalContext.current
     val resources = LocalResources.current
     val logoPainter = rememberDrawablePainter(drawable = remember(resources) {
@@ -156,6 +155,10 @@ fun DashboardScreen(
         initialPage = DashboardPage.DASHBOARD.ordinal,
         initialPageOffsetFraction = 0f
     ) { DashboardPage.entries.size }
+
+    val appsLazyListState = rememberLazyListState()
+    val appsSearchLazyListState = rememberLazyListState()
+    var appsSearchExpanded by rememberSaveable { mutableStateOf(false) }
 
     val dashboardPatchesParams = remember {
         SelectedApplicationInfo.PatchesSelector.ViewModelParams(
@@ -211,32 +214,24 @@ fun DashboardScreen(
     }
 
     var showUpdateDialog by rememberSaveable { mutableStateOf(true) }
-    if (managerAutoUpdates && showUpdateDialog && showManagerUpdateDialogOnLaunch && availableUpdate != null) {
+    if (managerAutoUpdates && showUpdateDialog && showManagerUpdateDialogOnLaunch && hasUpdate) {
         AvailableUpdateDialog(
             onDismiss = { showUpdateDialog = false },
             setShowManagerUpdateDialogOnLaunch = vm::setShowManagerUpdateDialogOnLaunch,
             onConfirm = onUpdateClick,
-            newVersion = availableUpdate!!
+            newVersion = updateVersion!!
         )
     }
 
-    var pendingAppSelectorLaunch by rememberSaveable { mutableStateOf(false) }
     var pendingPatchablePackage by rememberSaveable { mutableStateOf<String?>(null) }
     var pendingStorageSelection by rememberSaveable { mutableStateOf<SelectedApp.Local?>(null) }
 
     fun clearPendingSelection() {
-        pendingAppSelectorLaunch = false
         pendingPatchablePackage = null
         pendingStorageSelection = null
     }
 
     fun resumePendingSelection() {
-        if (pendingAppSelectorLaunch) {
-            clearPendingSelection()
-            onAppSelectorClick()
-            return
-        }
-
         pendingPatchablePackage?.let {
             clearPendingSelection()
             onPatchableAppClick(it)
@@ -349,7 +344,7 @@ fun DashboardScreen(
                             }
                         },
                         actions = {
-                            if (availableUpdate != null) {
+                            if (hasUpdate) {
                                 TooltipIconButton(
                                     onClick = onUpdateClick,
                                     tooltip = stringResource(R.string.update),
@@ -401,12 +396,24 @@ fun DashboardScreen(
                 },
                 containerColor = Color.Transparent,
                 floatingActionButton = {
+                    val currentScrollState =
+                        if (appsSearchExpanded) appsSearchLazyListState else appsLazyListState
+                    val showBackToTop by remember(currentScrollState) {
+                        derivedStateOf { currentScrollState.firstVisibleItemIndex > 0 }
+                    }
+
                     DashboardFab(
                         pagerState = pagerState,
                         patchesSourceEditMode = patchesSourceEditMode,
                         onEnablePatchesSourceEditMode = { patchesSourceEditMode = true },
                         onAddBundleClick = {
                             showAddBundleDialog = true
+                        },
+                        showScrollToTop = showBackToTop,
+                        onScrollToTop = {
+                            composableScope.launch {
+                                currentScrollState.animateScrollToItem(0)
+                            }
                         }
                     )
                 }
@@ -462,36 +469,15 @@ fun DashboardScreen(
                         vm.unreadAnnouncement?.let { announcement ->
                             {
                                 NotificationCard(
-                                    text = stringResource(R.string.new_announcement, announcement.title),
+                                    title = stringResource(R.string.new_announcement),
+                                    text = announcement.title,
                                     icon = Icons.Filled.Notifications,
-                                    actions = {
-                                        val colors = ButtonDefaults.textButtonColors(
-                                            contentColor = LocalContentColor.current
-                                        )
-
-                                        TextButton(
-                                            onClick = vm::markUnreadAnnouncementRead,
-                                            shapes = ButtonDefaults.shapes(),
-                                            colors = colors
-                                        ) {
-                                            Text(stringResource(R.string.dismiss))
-                                        }
-                                        TextButton(
-                                            onClick = {
-                                                vm.markUnreadAnnouncementRead()
-                                                onAnnouncementClick(announcement)
-                                            },
-                                            shapes = ButtonDefaults.shapes(),
-                                            colors = colors
-                                        ) {
-                                            Text(stringResource(R.string.view_announcement))
-                                        }
-                                    },
                                     type = if (announcement.level > 0) NotificationCardType.ERROR else NotificationCardType.NORMAL,
                                     onClick = {
                                         vm.markUnreadAnnouncementRead()
                                         onAnnouncementClick(announcement)
-                                    }
+                                    },
+                                    onDismiss = vm::markUnreadAnnouncementRead
                                 )
                             }
                         }
@@ -504,10 +490,13 @@ fun DashboardScreen(
                     ) { index ->
                         when (DashboardPage.entries[index]) {
                             DashboardPage.DASHBOARD -> {
-                                InstalledAppsScreen(
+                                AppsScreen(
                                     onAppClick = { onAppClick(it.currentPackageName) },
                                     onPatchableAppClick = ::onPatchableSelection,
-                                    onStorageSelect = { selectedApp -> onStorageSelection(selectedApp) }
+                                    onStorageSelect = { selectedApp -> onStorageSelection(selectedApp)},
+                                    lazyListState = appsLazyListState,
+                                    searchLazyListState = appsSearchLazyListState,
+                                    onSearchExpandedChange = { appsSearchExpanded = it }
                                 )
                             }
 
@@ -552,9 +541,15 @@ private fun DashboardFab(
     pagerState: PagerState,
     patchesSourceEditMode: Boolean,
     onEnablePatchesSourceEditMode: () -> Unit,
-    onAddBundleClick: () -> Unit
+    onAddBundleClick: () -> Unit,
+    showScrollToTop: Boolean,
+    onScrollToTop: () -> Unit
 ) {
     val fabState = when (pagerState.currentPage) {
+        DashboardPage.DASHBOARD.ordinal -> {
+            if (showScrollToTop) DashboardFabState.ScrollToTop else DashboardFabState.Hidden
+        }
+
         DashboardPage.BUNDLES.ordinal -> {
             if (patchesSourceEditMode) DashboardFabState.AddBundles else DashboardFabState.EditBundles
         }
@@ -562,46 +557,69 @@ private fun DashboardFab(
         else -> DashboardFabState.Hidden
     }
 
-    if (fabState == DashboardFabState.Hidden) return
-
-    HapticExtendedFloatingActionButton(
-        onClick = if (fabState == DashboardFabState.AddBundles) onAddBundleClick else onEnablePatchesSourceEditMode,
-        tooltip = stringResource(
-            if (fabState == DashboardFabState.AddBundles) R.string.fab_add_patches else R.string.edit
-        ),
-        expanded = fabState == DashboardFabState.AddBundles,
-        icon = {
-            AnimatedContent(
-                targetState = fabState,
-                transitionSpec = {
-                    (fadeIn(animationSpec = tween(durationMillis = 180, delayMillis = 60)) +
-                            scaleIn(animationSpec = tween(durationMillis = 180, delayMillis = 60), initialScale = 0.85f)) togetherWith
-                            (fadeOut(animationSpec = tween(durationMillis = 90)) +
-                                    scaleOut(animationSpec = tween(durationMillis = 90), targetScale = 0.85f))
-                },
-                label = "dashboard_fab_icon_transition"
-            ) { state ->
-                when (state) {
-                    DashboardFabState.EditBundles -> {
-                        Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.edit))
-                    }
-
-                    DashboardFabState.AddBundles -> {
-                        Icon(Icons.Default.Add, contentDescription = null)
-                    }
-
-                    DashboardFabState.Hidden -> Unit
+    AnimatedVisibility(
+        visible = fabState != DashboardFabState.Hidden, enter = fadeIn() + scaleIn(), exit = fadeOut() + scaleOut()
+    ) {
+        HapticExtendedFloatingActionButton(
+            onClick = {
+                when (fabState) {
+                    DashboardFabState.AddBundles -> onAddBundleClick()
+                    DashboardFabState.EditBundles -> onEnablePatchesSourceEditMode()
+                    DashboardFabState.ScrollToTop -> onScrollToTop()
+                    else -> {}
                 }
-            }
-        },
-        text = { Text(stringResource(R.string.fab_add_patches)) }
-    )
+            },
+            tooltip = stringResource(
+                if (fabState == DashboardFabState.AddBundles) R.string.fab_add_patches else R.string.edit
+            ),
+            expanded = fabState == DashboardFabState.AddBundles,
+            icon = {
+                AnimatedContent(
+                    targetState = fabState,
+                    transitionSpec = {
+                        (fadeIn(animationSpec = tween(durationMillis = 180, delayMillis = 60)) +
+                                scaleIn(
+                                    animationSpec = tween(durationMillis = 180, delayMillis = 60),
+                                    initialScale = 0.85f
+                                )) togetherWith
+                                (fadeOut(animationSpec = tween(durationMillis = 90)) +
+                                        scaleOut(
+                                            animationSpec = tween(durationMillis = 90),
+                                            targetScale = 0.85f
+                                        ))
+                    },
+                    label = "dashboard_fab_icon_transition"
+                ) { state ->
+                    when (state) {
+                        DashboardFabState.EditBundles -> {
+                            Icon(
+                                Icons.Outlined.Edit,
+                                contentDescription = stringResource(R.string.edit)
+                            )
+                        }
+
+                        DashboardFabState.AddBundles -> {
+                            Icon(Icons.Default.Add, contentDescription = null)
+                        }
+
+                        DashboardFabState.ScrollToTop -> {
+                            Icon(Icons.Filled.KeyboardArrowUp, contentDescription = null)
+                        }
+
+                        else -> {}
+                    }
+                }
+            },
+            text = { Text(stringResource(R.string.fab_add_patches)) }
+        )
+    }
 }
 
 private enum class DashboardFabState {
     Hidden,
     EditBundles,
     AddBundles,
+    ScrollToTop
 }
 
 @Composable

@@ -1,7 +1,6 @@
 package app.revanced.manager.network.api
 
 import android.util.Log
-import app.revanced.manager.BuildConfig
 import app.revanced.manager.domain.manager.PreferencesManager
 import app.revanced.manager.domain.manager.base.Preference
 import app.revanced.manager.network.dto.ReVancedAnnouncement
@@ -11,7 +10,6 @@ import app.revanced.manager.network.dto.ReVancedGitRepository
 import app.revanced.manager.network.dto.ReVancedInfo
 import app.revanced.manager.network.service.HttpService
 import app.revanced.manager.network.utils.APIResponse
-import app.revanced.manager.network.utils.getOrThrow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import io.ktor.client.request.url
@@ -43,18 +41,15 @@ class ReVancedAPI(
 
     suspend fun getAnnouncements() = request<List<ReVancedAnnouncement>>("announcements")
 
-    suspend fun getAppUpdate() =
-        getLatestAppInfo().getOrThrow().takeIf { it.version.removePrefix("v") != BuildConfig.VERSION_NAME }
-
     suspend fun getLatestAppInfo() =
         request<ReVancedAsset>("manager${prefs.useManagerPrereleases.prereleaseString()}")
 
-    suspend fun getAppHistory() = request<List<ReVancedAssetHistory>>("manager/history")
+    suspend fun getAppHistory() = request<List<ReVancedAssetHistory>>("manager/history${prefs.useManagerPrereleases.prereleaseString()}")
 
     suspend fun getPatchesUpdate() = request<ReVancedAsset>("patches${prefs.usePatchesPrereleases.prereleaseString()}")
 
-    suspend fun getPatchesHistory(apiUrl: String) =
-        request<List<ReVancedAssetHistory>>(apiUrl, defaultApiVersion, "patches/history")
+    suspend fun getPatchesHistory(apiUrl: String, prerelease: Boolean) =
+        request<List<ReVancedAssetHistory>>(apiUrl, defaultApiVersion, "patches/history${prerelease.prereleaseString()}")
 
     suspend fun getDownloaderUpdate() = request<ReVancedAsset>("manager/downloaders${prefs.useDownloaderPrerelease.prereleaseString()}")
 
@@ -64,5 +59,6 @@ class ReVancedAPI(
 
     private companion object {
         suspend fun Preference<Boolean>.prereleaseString() = if (get()) "/prerelease" else ""
+        fun Boolean.prereleaseString() = if (this) "/prerelease" else ""
     }
 }

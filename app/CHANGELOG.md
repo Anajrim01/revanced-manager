@@ -1,3 +1,220 @@
+# app [2.6.0-dev.12](https://github.com/ReVanced/revanced-manager/compare/v2.6.0-dev.11...v2.6.0-dev.12) (2026-04-22)
+
+
+### Performance Improvements
+
+* **patcher:** Silence trace logs to fix GC thrashing and OOM ([#3287](https://github.com/ReVanced/revanced-manager/issues/3287)) ([ab4bdd3](https://github.com/ReVanced/revanced-manager/commit/ab4bdd34c5508ae3b03c7a293c91975c38ded22b))
+
+# app [2.6.0-dev.11](https://github.com/ReVanced/revanced-manager/compare/v2.6.0-dev.10...v2.6.0-dev.11) (2026-04-16)
+
+
+### Features
+
+* enable Ackpine logging ([7cf28c0](https://github.com/ReVanced/revanced-manager/commit/7cf28c0840688898af2f7bc22ca60ef1caa96a3f))
+
+# app [2.6.0-dev.10](https://github.com/ReVanced/revanced-manager/compare/v2.6.0-dev.9...v2.6.0-dev.10) (2026-04-06)
+
+
+### Bug Fixes
+
+* BusError when running 32b binary on armv8 with compatibility ([#3279](https://github.com/ReVanced/revanced-manager/issues/3279)) ([c1e1a82](https://github.com/ReVanced/revanced-manager/commit/c1e1a8243adb86fdf907b0b402c97c36c279567b))
+
+# app [2.6.0-dev.9](https://github.com/ReVanced/revanced-manager/compare/v2.6.0-dev.8...v2.6.0-dev.9) (2026-04-02)
+
+
+### Bug Fixes
+
+* **Updater:** Handle session death ([#3249](https://github.com/ReVanced/revanced-manager/issues/3249)) ([f1c56aa](https://github.com/ReVanced/revanced-manager/commit/f1c56aa0a9655fd93d1386ccca28c7ce7099d4d3))
+
+# app [2.6.0-dev.8](https://github.com/ReVanced/revanced-manager/compare/v2.6.0-dev.7...v2.6.0-dev.8) (2026-04-01)
+
+
+### Bug Fixes
+
+* Don't hide PatchOptions behind keyboard ([dd3d474](https://github.com/ReVanced/revanced-manager/commit/dd3d474798e39a800fd5ecff129e1561f204e36b))
+* Paddings for AppScreen and PatchesScreen ([af3d0d7](https://github.com/ReVanced/revanced-manager/commit/af3d0d79c582f29b7f7acec2b5e59de3b06ea3e2))
+* UpdateScreen padding ([e3c6d57](https://github.com/ReVanced/revanced-manager/commit/e3c6d5740b7013446aaf450739b37e848389c2cb))
+
+# app [2.6.0-dev.7](https://github.com/ReVanced/revanced-manager/compare/v2.6.0-dev.6...v2.6.0-dev.7) (2026-04-01)
+
+
+### Features
+
+* Improve patch options ([#3213](https://github.com/ReVanced/revanced-manager/issues/3213)) ([90667c8](https://github.com/ReVanced/revanced-manager/commit/90667c8c141c743b11a189e7ab3061ee58c7bc87))
+
+# app [2.6.0-dev.6](https://github.com/ReVanced/revanced-manager/compare/v2.6.0-dev.5...v2.6.0-dev.6) (2026-04-01)
+
+
+### Bug Fixes
+
+* Missing database migration file [no ci] ([df9b44c](https://github.com/ReVanced/revanced-manager/commit/df9b44c9f4959c81e16a1665e8066bd01e97b1fe))
+
+
+### Features
+
+* Improve AppsScreen design, add app pinning and jump to top ([#3240](https://github.com/ReVanced/revanced-manager/issues/3240)) ([46720a4](https://github.com/ReVanced/revanced-manager/commit/46720a4a885ad5aa321ab855439bb30c292cb17f))
+
+# app [2.6.0-dev.5](https://github.com/ReVanced/revanced-manager/compare/v2.6.0-dev.4...v2.6.0-dev.5) (2026-03-29)
+
+
+### Bug Fixes
+
+* Dashboard padding ([5f757b6](https://github.com/ReVanced/revanced-manager/commit/5f757b6ee1fd923afaeffeae6bde12934822c30f))
+
+# app [2.6.0-dev.4](https://github.com/ReVanced/revanced-manager/compare/v2.6.0-dev.3...v2.6.0-dev.4) (2026-03-28)
+
+
+### Bug Fixes
+
+* Ignore RichTap vibrator hardware crash ([7856652](https://github.com/ReVanced/revanced-manager/commit/7856652506896a804a57fc085e80c6cf5c1fcba0))
+
+# app [2.6.0-dev.3](https://github.com/ReVanced/revanced-manager/compare/v2.6.0-dev.2...v2.6.0-dev.3) (2026-03-26)
+
+
+### Bug Fixes
+
+* Preserve applied patches on patched apps when source patches is deleted ([#3227](https://github.com/ReVanced/revanced-manager/issues/3227)) ([4884fdb](https://github.com/ReVanced/revanced-manager/commit/4884fdb5545134181a8a2176c7a21911aa22be9b))
+
+# app [2.6.0-dev.2](https://github.com/ReVanced/revanced-manager/compare/v2.6.0-dev.1...v2.6.0-dev.2) (2026-03-25)
+
+
+### Bug Fixes
+
+* Adjust font size and fix letter spacing in announcements ([e1660a7](https://github.com/ReVanced/revanced-manager/commit/e1660a7f2f94f3f50ee8bb2479888af8b760e51e))
+
+# app [2.6.0-dev.1](https://github.com/ReVanced/revanced-manager/compare/v2.5.1...v2.6.0-dev.1) (2026-03-25)
+
+
+### Features
+
+* Better styling for announcements ([4f88357](https://github.com/ReVanced/revanced-manager/commit/4f88357d9f2aa44bcab980e2719f3d28d169de85))
+
+## app [2.5.1](https://github.com/ReVanced/revanced-manager/compare/v2.5.0...v2.5.1) (2026-03-24)
+
+
+### Bug Fixes
+
+* Don't show update screen when there's no update ([f10cda0](https://github.com/ReVanced/revanced-manager/commit/f10cda0bc6ab82eb3085ebee8e05f0dd90b477b6))
+* Update screen padding ([6ba6a6e](https://github.com/ReVanced/revanced-manager/commit/6ba6a6e28bb6a2c228d251e18c9246e291dc1316))
+
+# app [2.5.0](https://github.com/ReVanced/revanced-manager/compare/v2.4.0...v2.5.0) (2026-03-24)
+
+
+### Bug Fixes
+
+* Update screen crashing ([cd9d2eb](https://github.com/ReVanced/revanced-manager/commit/cd9d2ebd06e0abc5b8b10a752d8c92ca65abc1e3))
+* Use ease out quart for screen transitions ([b69f7c2](https://github.com/ReVanced/revanced-manager/commit/b69f7c2ba8d320e10c3558681294f8bac93618ae))
+* Use em-space and bigger bullet symbols in announcement screen ([2538b6a](https://github.com/ReVanced/revanced-manager/commit/2538b6a7553a1d9366d9f2345a6a471381f18d88))
+* Weird padding in Update screen ([2e96c58](https://github.com/ReVanced/revanced-manager/commit/2e96c58f7bc3afc9fd636b76a2204b1b995f8da6))
+
+
+### Features
+
+* Improve Updates settings screen ([4ce823c](https://github.com/ReVanced/revanced-manager/commit/4ce823c8c0f4de2bea6c07b362741a980b392e79))
+* Show release dates and patch count ([#3185](https://github.com/ReVanced/revanced-manager/issues/3185)) ([d5a5ec6](https://github.com/ReVanced/revanced-manager/commit/d5a5ec62a4c57a8b6bc0fcc23c8b74c65be2c66e))
+
+# app [2.5.0-dev.2](https://github.com/ReVanced/revanced-manager/compare/v2.5.0-dev.1...v2.5.0-dev.2) (2026-03-23)
+
+
+### Features
+
+* Show release dates and patch count ([#3185](https://github.com/ReVanced/revanced-manager/issues/3185)) ([d5a5ec6](https://github.com/ReVanced/revanced-manager/commit/d5a5ec62a4c57a8b6bc0fcc23c8b74c65be2c66e))
+
+# app [2.5.0-dev.1](https://github.com/ReVanced/revanced-manager/compare/v2.4.1-dev.1...v2.5.0-dev.1) (2026-03-23)
+
+
+### Bug Fixes
+
+* Update screen crashing ([cd9d2eb](https://github.com/ReVanced/revanced-manager/commit/cd9d2ebd06e0abc5b8b10a752d8c92ca65abc1e3))
+* Weird padding in Update screen ([2e96c58](https://github.com/ReVanced/revanced-manager/commit/2e96c58f7bc3afc9fd636b76a2204b1b995f8da6))
+
+
+### Features
+
+* Improve Updates settings screen ([4ce823c](https://github.com/ReVanced/revanced-manager/commit/4ce823c8c0f4de2bea6c07b362741a980b392e79))
+
+## app [2.4.1-dev.1](https://github.com/ReVanced/revanced-manager/compare/v2.4.0...v2.4.1-dev.1) (2026-03-23)
+
+
+### Bug Fixes
+
+* Use ease out quart for screen transitions ([b69f7c2](https://github.com/ReVanced/revanced-manager/commit/b69f7c2ba8d320e10c3558681294f8bac93618ae))
+* Use em-space and bigger bullet symbols in announcement screen ([2538b6a](https://github.com/ReVanced/revanced-manager/commit/2538b6a7553a1d9366d9f2345a6a471381f18d88))
+
+# app [2.4.0](https://github.com/ReVanced/revanced-manager/compare/v2.3.0...v2.4.0) (2026-03-23)
+
+
+### Bug Fixes
+
+* Apply M3 style guide to UI strings ([#3114](https://github.com/ReVanced/revanced-manager/issues/3114)) ([8f773bc](https://github.com/ReVanced/revanced-manager/commit/8f773bc7ab61e3e475de2fd2e3df9aab7d9984f3))
+* Handle prerelease status when fetching changelogs ([742e6e8](https://github.com/ReVanced/revanced-manager/commit/742e6e8e781a320ea711ef5dd4c66b8144b0e3c8))
+* Hide apps with no explicit compatibility when safeguard is on ([#3174](https://github.com/ReVanced/revanced-manager/issues/3174)) ([be91aa1](https://github.com/ReVanced/revanced-manager/commit/be91aa1c67a7896bfb3c789961ae4411140f0b0e))
+* Improve dialogs ([#3165](https://github.com/ReVanced/revanced-manager/issues/3165)) ([2fb13cd](https://github.com/ReVanced/revanced-manager/commit/2fb13cdcc73ec5741a3dca94d93a951f88012769))
+* Improve notification cards ([653c14e](https://github.com/ReVanced/revanced-manager/commit/653c14ea5d1eeaf986a0ce2a4ab2e0c7dcf1d53b))
+* Load app info from installed apps by default ([e7cff33](https://github.com/ReVanced/revanced-manager/commit/e7cff333182acb140883ee763b8be70730ab798f))
+* Show patchable section header only when it's not the only section ([#3173](https://github.com/ReVanced/revanced-manager/issues/3173)) ([65b9e95](https://github.com/ReVanced/revanced-manager/commit/65b9e95c60abe9e974a6e4c67b827dcf4f429ee8))
+
+
+### Features
+
+* Speed up loading app list ([f0727b2](https://github.com/ReVanced/revanced-manager/commit/f0727b27debef4cebc3c8f9339330a39c4e92d9a))
+
+# app [2.4.0-dev.2](https://github.com/ReVanced/revanced-manager/compare/v2.4.0-dev.1...v2.4.0-dev.2) (2026-03-23)
+
+
+### Bug Fixes
+
+* Load app info from installed apps by default ([e7cff33](https://github.com/ReVanced/revanced-manager/commit/e7cff333182acb140883ee763b8be70730ab798f))
+
+# app [2.4.0-dev.1](https://github.com/ReVanced/revanced-manager/compare/v2.3.1-dev.6...v2.4.0-dev.1) (2026-03-22)
+
+
+### Features
+
+* Speed up loading app list ([f0727b2](https://github.com/ReVanced/revanced-manager/commit/f0727b27debef4cebc3c8f9339330a39c4e92d9a))
+
+## app [2.3.1-dev.6](https://github.com/ReVanced/revanced-manager/compare/v2.3.1-dev.5...v2.3.1-dev.6) (2026-03-22)
+
+
+### Bug Fixes
+
+* Hide apps with no explicit compatibility when safeguard is on ([#3174](https://github.com/ReVanced/revanced-manager/issues/3174)) ([be91aa1](https://github.com/ReVanced/revanced-manager/commit/be91aa1c67a7896bfb3c789961ae4411140f0b0e))
+
+## app [2.3.1-dev.5](https://github.com/ReVanced/revanced-manager/compare/v2.3.1-dev.4...v2.3.1-dev.5) (2026-03-22)
+
+
+### Bug Fixes
+
+* Show patchable section header only when it's not the only section ([#3173](https://github.com/ReVanced/revanced-manager/issues/3173)) ([65b9e95](https://github.com/ReVanced/revanced-manager/commit/65b9e95c60abe9e974a6e4c67b827dcf4f429ee8))
+
+## app [2.3.1-dev.4](https://github.com/ReVanced/revanced-manager/compare/v2.3.1-dev.3...v2.3.1-dev.4) (2026-03-22)
+
+
+### Bug Fixes
+
+* Improve dialogs ([#3165](https://github.com/ReVanced/revanced-manager/issues/3165)) ([2fb13cd](https://github.com/ReVanced/revanced-manager/commit/2fb13cdcc73ec5741a3dca94d93a951f88012769))
+
+## app [2.3.1-dev.3](https://github.com/ReVanced/revanced-manager/compare/v2.3.1-dev.2...v2.3.1-dev.3) (2026-03-22)
+
+
+### Bug Fixes
+
+* Improve notification cards ([653c14e](https://github.com/ReVanced/revanced-manager/commit/653c14ea5d1eeaf986a0ce2a4ab2e0c7dcf1d53b))
+
+## app [2.3.1-dev.2](https://github.com/ReVanced/revanced-manager/compare/v2.3.1-dev.1...v2.3.1-dev.2) (2026-03-22)
+
+
+### Bug Fixes
+
+* Handle prerelease status when fetching changelogs ([742e6e8](https://github.com/ReVanced/revanced-manager/commit/742e6e8e781a320ea711ef5dd4c66b8144b0e3c8))
+
+## app [2.3.1-dev.1](https://github.com/ReVanced/revanced-manager/compare/v2.3.0...v2.3.1-dev.1) (2026-03-21)
+
+
+### Bug Fixes
+
+* Apply M3 style guide to UI strings ([#3114](https://github.com/ReVanced/revanced-manager/issues/3114)) ([8f773bc](https://github.com/ReVanced/revanced-manager/commit/8f773bc7ab61e3e475de2fd2e3df9aab7d9984f3))
+
 # app [2.3.0](https://github.com/ReVanced/revanced-manager/compare/v2.2.3...v2.3.0) (2026-03-20)
 
 

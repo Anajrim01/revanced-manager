@@ -38,6 +38,7 @@ dependencies {
     implementation(libs.compose.material.icons.extended)
     implementation(libs.compose.material3)
     implementation(libs.navigation.compose)
+    implementation(libs.paging3)
 
     // Accompanist
     implementation(libs.accompanist.drawablepainter)
@@ -178,10 +179,6 @@ android {
     }
 
     buildTypes {
-        debug {
-            resValue("string", "app_name", "ReVanced Manager (Debug)")
-        }
-
         release {
             // Causes patching to not work properly, if enabled.
             isMinifyEnabled = false
@@ -190,10 +187,7 @@ android {
             val keystoreFile = file("keystore.jks")
 
             if (project.hasProperty("signAsDebug") || !keystoreFile.exists()) {
-                resValue("string", "app_name", "ReVanced Manager (Debug signed)")
                 signingConfig = signingConfigs.getByName("debug")
-
-                isPseudoLocalesEnabled = true
             } else {
                 signingConfig = signingConfigs.create("release") {
                     storeFile = keystoreFile

@@ -1,13 +1,15 @@
 package app.revanced.manager.ui.screen
 
 import android.app.Activity
-import android.os.Build
+import android.content.pm.PackageInstaller
 import android.view.WindowManager
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.CreateDocument
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -150,6 +152,8 @@ fun PatcherScreen(
     }
 
     viewModel.packageInstallerStatus?.let {
+        // Don't show when the user cancels the installation (they can click Install again anyway)
+        if (it == PackageInstaller.STATUS_FAILURE_ABORTED) return@let
         InstallerStatusDialog(it, viewModel, viewModel::dismissPackageInstallerDialog)
     }
 
@@ -267,8 +271,14 @@ fun PatcherScreen(
                 expandedCategory = category
             }
 
+            val patcherProgress by animateFloatAsState(
+                targetValue = viewModel.progress,
+                animationSpec = tween(),
+                label = "patcherProgress"
+            )
+
             LinearWavyProgressIndicator(
-                progress = { viewModel.progress },
+                progress = { patcherProgress },
                 modifier = Modifier.fillMaxWidth()
             )
 

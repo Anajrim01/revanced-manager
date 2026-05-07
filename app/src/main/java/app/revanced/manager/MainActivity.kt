@@ -6,8 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.core.EaseInOutQuad
-import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.EaseOutQuart
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -30,7 +29,6 @@ import androidx.navigation.toRoute
 import app.revanced.manager.domain.repository.ChangelogSource
 import app.revanced.manager.ui.model.navigation.Announcement
 import app.revanced.manager.ui.model.navigation.Announcements
-import app.revanced.manager.ui.model.navigation.AppSelector
 import app.revanced.manager.ui.model.navigation.BundleInformation
 import app.revanced.manager.ui.model.navigation.ComplexParameter
 import app.revanced.manager.ui.model.navigation.Dashboard
@@ -42,7 +40,6 @@ import app.revanced.manager.ui.model.navigation.Settings
 import app.revanced.manager.ui.model.navigation.Update
 import app.revanced.manager.ui.screen.AnnouncementScreen
 import app.revanced.manager.ui.screen.AnnouncementsScreen
-import app.revanced.manager.ui.screen.AppSelectorScreen
 import app.revanced.manager.ui.screen.BundleInformationScreen
 import app.revanced.manager.ui.screen.DashboardScreen
 import app.revanced.manager.ui.screen.InstalledAppInfoScreen
@@ -77,7 +74,6 @@ import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
 import org.koin.androidx.viewmodel.ext.android.getViewModel as getActivityViewModel
-
 
 class MainActivity : AppCompatActivity() {
     @ExperimentalAnimationApi
@@ -131,24 +127,24 @@ private fun ReVancedManager(vm: MainViewModel) {
         startDestination = startDestination,
         enterTransition = {
             slideInHorizontally(
-                animationSpec = tween(300, easing = EaseInOutQuad),
+                animationSpec = tween(300, easing = EaseOutQuart),
                 initialOffsetX = { it })
         },
         exitTransition = {
             slideOutHorizontally(
-                animationSpec = tween(300, easing = EaseOut),
+                animationSpec = tween(300, easing = EaseOutQuart),
                 targetOffsetX = { -it / 3 })
         },
         popEnterTransition = {
             slideInHorizontally(
                 animationSpec = tween(
                     300,
-                    easing = EaseInOutQuad
+                    easing = EaseOutQuart
                 ), initialOffsetX = { -it / 3 })
         },
         popExitTransition = {
             slideOutHorizontally(
-                animationSpec = tween(300, easing = EaseOut),
+                animationSpec = tween(300, easing = EaseOutQuart),
                 targetOffsetX = { it })
         }
     ) {
@@ -166,9 +162,6 @@ private fun ReVancedManager(vm: MainViewModel) {
         composable<Dashboard> {
             DashboardScreen(
                 onSettingsClick = { navController.navigateSafe(Settings) },
-                onAppSelectorClick = {
-                    navController.navigateSafe(AppSelector)
-                },
                 onUpdateClick = {
                     navController.navigateSafe(Update())
                 },
@@ -215,14 +208,6 @@ private fun ReVancedManager(vm: MainViewModel) {
             )
         }
 
-        composable<AppSelector> {
-            AppSelectorScreen(
-                onSelect = vm::selectApp,
-                onStorageSelect = vm::selectApp,
-                onBackClick = navController::popBackStackSafe
-            )
-        }
-
         composable<Patcher> {
             PatcherScreen(
                 onBackClick = {
@@ -242,7 +227,12 @@ private fun ReVancedManager(vm: MainViewModel) {
 
             UpdateScreen(
                 onBackClick = navController::popBackStackSafe,
-                vm = koinViewModel { parametersOf(data.downloadOnScreenEntry) }
+                vm = koinViewModel {
+                    parametersOf(
+                        ChangelogSource.Manager,
+                        data.downloadOnScreenEntry
+                    )
+                }
             )
         }
 
@@ -264,13 +254,7 @@ private fun ReVancedManager(vm: MainViewModel) {
 
         navigation<SelectedApplicationInfo>(startDestination = SelectedApplicationInfo.Main) {
             composable<SelectedApplicationInfo.Main> {
-                val parentBackStackEntry = navController.navGraphEntry(it)
-                val data =
-                    parentBackStackEntry.getComplexArg<SelectedApplicationInfo.ViewModelParams>()
-                val viewModel =
-                    koinViewModel<SelectedAppInfoViewModel>(viewModelStoreOwner = parentBackStackEntry) {
-                        parametersOf(data)
-                    }
+                val viewModel = navController.selectedAppInfoViewModel(it)
 
                 SelectedAppInfoScreen(
                     onBackClick = navController::popBackStackSafe,
@@ -309,9 +293,7 @@ private fun ReVancedManager(vm: MainViewModel) {
             composable<SelectedApplicationInfo.PatchesSelector> {
                 val data =
                     it.getComplexArg<SelectedApplicationInfo.PatchesSelector.ViewModelParams>()
-                val selectedAppInfoVm = koinViewModel<SelectedAppInfoViewModel>(
-                    viewModelStoreOwner = navController.navGraphEntry(it)
-                )
+                val selectedAppInfoVm = navController.selectedAppInfoViewModel(it)
 
                 PatchesSelectorScreen(
                     onBackClick = navController::popBackStackSafe,
@@ -329,9 +311,7 @@ private fun ReVancedManager(vm: MainViewModel) {
             composable<SelectedApplicationInfo.RequiredOptions> {
                 val data =
                     it.getComplexArg<SelectedApplicationInfo.PatchesSelector.ViewModelParams>()
-                val selectedAppInfoVm = koinViewModel<SelectedAppInfoViewModel>(
-                    viewModelStoreOwner = navController.navGraphEntry(it)
-                )
+                val selectedAppInfoVm = navController.selectedAppInfoViewModel(it)
 
                 RequiredOptionsScreen(
                     onBackClick = navController::popBackStackSafe,
@@ -425,6 +405,15 @@ private fun ReVancedManager(vm: MainViewModel) {
 @Composable
 private fun NavController.navGraphEntry(entry: NavBackStackEntry) =
     remember(entry) { getBackStackEntry(entry.destination.parent!!.id) }
+
+@Composable
+private fun NavController.selectedAppInfoViewModel(
+    entry: NavBackStackEntry
+): SelectedAppInfoViewModel {
+    val parentEntry = navGraphEntry(entry)
+    val data = parentEntry.getComplexArg<SelectedApplicationInfo.ViewModelParams>()
+    return koinViewModel(viewModelStoreOwner = parentEntry) { parametersOf(data) }
+}
 
 // Androidx Navigation does not support storing complex types in route objects, so we have to store them inside the saved state handle of the back stack entry instead.
 private fun <T : Parcelable, R : ComplexParameter<T>> NavController.navigateComplex(

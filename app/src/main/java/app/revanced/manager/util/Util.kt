@@ -6,7 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
-import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.renderscript.Allocation
 import android.renderscript.Element
 import android.renderscript.RenderScript
@@ -23,7 +24,6 @@ import androidx.compose.material3.ListItemDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberUpdatedState
@@ -48,10 +48,7 @@ import app.revanced.manager.BuildConfig
 import app.revanced.manager.R
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
@@ -97,24 +94,16 @@ fun Context.toast(@StringRes stringRes: Int, duration: Int = Toast.LENGTH_SHORT)
  * @param logMsg The log message.
  * @param block The code to execute.
  */
-@OptIn(DelicateCoroutinesApi::class)
 inline fun uiSafe(context: Context, @StringRes toastMsg: Int, logMsg: String, block: () -> Unit) {
     try {
         block()
     } catch (e: CancellationException) {
         throw e
     } catch (error: Exception) {
-        // You can only toast on the main thread.
-        GlobalScope.launch(Dispatchers.Main) {
-            context.toast(
-                context.getString(
-                    toastMsg,
-                    error.simpleMessage()
-                )
-            )
+        Handler(Looper.getMainLooper()).post {
+            context.toast(context.getString(toastMsg, error.simpleMessage()))
+            Log.e(tag, logMsg, error)
         }
-
-        Log.e(tag, logMsg, error)
     }
 }
 
@@ -275,7 +264,13 @@ val ScrollState.isScrollingUp: Boolean @Composable get() = this.isScrollingUp().
 fun <R> (() -> R).withHapticFeedback(constant: Int): () -> R {
     val view = LocalView.current
     return {
-        view.performHapticFeedback(constant)
+        try {
+            view.performHapticFeedback(constant)
+        } catch (e: NullPointerException) {
+            // Note, some devices using RichTap hardware reported crashing, what??
+            // https://github.com/ReVanced/revanced-manager/issues/3224
+            Log.e("RVM-Util/Vibration", "Vibration failed with NPE, what?", e)
+        }
         this()
     }
 }
@@ -285,7 +280,13 @@ fun <R> (() -> R).withHapticFeedback(constant: Int): () -> R {
 fun <T, R> ((T) -> R).withHapticFeedback(constant: Int): (T) -> R {
     val view = LocalView.current
     return {
-        view.performHapticFeedback(constant)
+        try {
+            view.performHapticFeedback(constant)
+        } catch (e: NullPointerException) {
+            // Note, some devices using RichTap hardware reported crashing, what??
+            // https://github.com/ReVanced/revanced-manager/issues/3224
+            Log.e("RVM-Util/Vibration", "Vibration failed with NPE, what?", e)
+        }
         this(it)
     }
 }
